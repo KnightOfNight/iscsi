@@ -1,0 +1,120 @@
+#!/usr/bin/perl
+
+
+use strict;
+use warnings;
+use Getopt::Long;
+
+
+my $default_portal = "deepthought";
+
+my $discover = 0;
+
+my $loginall = 0;
+my $logoutall = 0;
+
+my $login = "";
+my $logout = "";
+
+my $forget = 0;
+
+my $list = 0;
+
+my $help = 0;
+
+
+my $go_res = GetOptions(
+	"discover" => \$discover,
+	"loginall" => \$loginall,
+	"logoutall" => \$logoutall,
+	"logout=s" => \$logout,
+	"forget" => \$forget,
+	"list" => \$list,
+	"help" => \$help
+);
+
+
+if ( !$go_res || (!$discover && !$loginall && !$logoutall && !$login && !$logout && !$forget && !$list) || $help ) {
+	print <<EOUSAGE;
+
+iscsi --discover
+
+iscsi --loginall
+iscsi --logoutall
+
+iscsi --login <session>
+iscsi --logout <session>
+
+iscsi --forget
+
+iscsi --list
+
+EOUSAGE
+	exit(0);
+}
+
+
+if ( $discover ) {
+	my $cmd = "iscsiadm --mode discoverydb --type sendtargets --discover --portal $default_portal";
+	system($cmd);
+	exit(0);
+}
+
+
+if ( $loginall ) {
+	my $cmd = "iscsiadm --mode node --loginall all --portal $default_portal";
+	system($cmd);
+	exit(0);
+}
+
+
+if ( $logoutall ) {
+	my $cmd = "iscsiadm --mode node --logoutall all";
+	system($cmd);
+	exit(0);
+}
+
+
+if ( $login ) {
+	my $cmd = "iscsiadm --mode node --login --target $login";
+	system($cmd);
+	exit(0);
+}
+
+
+if ( $logout ) {
+	my $cmd = "iscsiadm --mode node --logout --target $logout";
+	system($cmd);
+	exit(0);
+}
+
+
+if ( $forget ) {
+	my $cmd = "iscsiadm --mode node -o delete --portal $default_portal";
+	system($cmd);
+	exit(0);
+}
+
+
+if ( $list ) {
+	printf("\n");
+
+	printf("Nodes...\n");
+	my $cmd = "iscsiadm --mode node";
+	system($cmd);
+	printf("\n");
+
+	printf("Sessions...\n");
+	$cmd = "iscsiadm --mode session";
+	system($cmd);
+	printf("\n");
+
+	printf("DiscoveryDB...\n");
+	$cmd = "iscsiadm --mode discoverydb";
+	system($cmd);
+	printf("\n");
+
+	exit(0);
+}
+
+
